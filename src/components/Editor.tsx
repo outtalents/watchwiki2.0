@@ -30,7 +30,7 @@ export function Editor({ file, onUpdateContent }: EditorProps) {
 
   if (!file) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-white dark:bg-gray-950 text-gray-400">
+      <div className="flex-1 flex items-center justify-center bg-white dark:bg-gray-950 text-gray-400 relative">
         <div className="text-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -105,7 +105,9 @@ export function Editor({ file, onUpdateContent }: EditorProps) {
             <circle cx="60" cy="60" r="2" fill="white" className="dark:fill-gray-950" strokeWidth="1.5" />
           </svg>
           <h2 className="text-xl font-medium text-[#15517a]">Watch Industry Knowledge Base</h2>
-          <p className="mt-2 text-sm text-[#15517a]">Select a file from the sidebar to view or edit.</p>
+        </div>
+        <div className="absolute bottom-8 w-full text-center">
+          <p className="text-sm text-[#15517a] opacity-60">Created by 果断</p>
         </div>
       </div>
     );
