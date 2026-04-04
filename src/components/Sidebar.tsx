@@ -143,7 +143,7 @@ export function Sidebar({
   return (
     <div className="w-64 flex-shrink-0 bg-[#15517a] text-white border-none flex flex-col h-full">
       <div className="p-4 border-b border-white/10 flex items-center justify-between bg-[#15517a]">
-        <h1 className="font-semibold text-white truncate">手表行业知识库</h1>
+        <h1 className="font-semibold text-white truncate">Watch Wiki</h1>
         <div className="flex space-x-1">
           <button
             onClick={() => onAddNode(null, 'file')}

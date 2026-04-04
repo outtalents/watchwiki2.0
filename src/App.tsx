@@ -47,6 +47,11 @@ export default function App() {
         // Remove trailing .md
         newName = newName.replace(/\.md$/, '');
         
+        // Revert root folder name back
+        if (node.id === 'root' && newName === 'Watch Wiki') {
+          newName = '手表行业知识库';
+        }
+        
         if (newName !== node.name) {
           changed = true;
           return { ...node, name: newName };
