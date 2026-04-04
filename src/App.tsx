@@ -127,7 +127,7 @@ export default function App() {
   const activeFile = nodes.find(n => n.id === activeFileId) || null;
 
   return (
-    <div className="flex h-screen w-full bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans">
+    <div className="flex h-screen w-full bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans overflow-hidden">
       <Sidebar
         nodes={nodes}
         activeFileId={activeFileId}
@@ -136,10 +136,13 @@ export default function App() {
         onAddNode={handleAddNode}
         onDeleteNode={handleDeleteNode}
         onRenameNode={handleRenameNode}
+        className={activeFileId ? "hidden md:flex" : "flex"}
       />
       <Editor
         file={activeFile}
         onUpdateContent={handleUpdateContent}
+        onBack={() => setActiveFileId(null)}
+        className={!activeFileId ? "hidden md:flex" : "flex"}
       />
     </div>
   );

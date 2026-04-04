@@ -11,6 +11,7 @@ interface SidebarProps {
   onAddNode: (parentId: string | null, type: 'file' | 'folder') => void;
   onDeleteNode: (id: string) => void;
   onRenameNode: (id: string, newName: string) => void;
+  className?: string;
 }
 
 export function Sidebar({
@@ -21,6 +22,7 @@ export function Sidebar({
   onAddNode,
   onDeleteNode,
   onRenameNode,
+  className,
 }: SidebarProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
@@ -141,7 +143,7 @@ export function Sidebar({
   const rootNodes = nodes.filter(n => n.parentId === null);
 
   return (
-    <div className="w-64 flex-shrink-0 bg-[#15517a] text-white border-none flex flex-col h-full">
+    <div className={cn("w-full md:w-64 flex-shrink-0 bg-[#15517a] text-white border-none flex-col h-full", className)}>
       <div className="p-4 border-b border-white/10 flex items-center justify-between bg-[#15517a]">
         <h1 className="font-semibold text-white truncate">Watch Wiki</h1>
         <div className="flex space-x-1">

@@ -2,14 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { FileNode } from '../types';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Edit3, Eye } from 'lucide-react';
+import { Edit3, Eye, ArrowLeft } from 'lucide-react';
+import { cn } from '../lib/utils';
 
 interface EditorProps {
   file: FileNode | null;
   onUpdateContent: (id: string, content: string) => void;
+  onBack?: () => void;
+  className?: string;
 }
 
-export function Editor({ file, onUpdateContent }: EditorProps) {
+export function Editor({ file, onUpdateContent, onBack, className }: EditorProps) {
   const [mode, setMode] = useState<'edit' | 'preview'>('preview');
   const [localContent, setLocalContent] = useState('');
 
@@ -30,7 +33,7 @@ export function Editor({ file, onUpdateContent }: EditorProps) {
 
   if (!file) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-white dark:bg-gray-950 text-gray-400 relative">
+      <div className={cn("flex-1 flex items-center justify-center bg-white dark:bg-gray-950 text-gray-400 relative", className)}>
         <div className="text-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -114,10 +117,20 @@ export function Editor({ file, onUpdateContent }: EditorProps) {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-white dark:bg-gray-950 h-full overflow-hidden">
-      <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-gray-800">
-        <h2 className="text-lg font-medium text-gray-800 dark:text-gray-200">{file.name}</h2>
-        <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+    <div className={cn("flex-1 flex flex-col bg-white dark:bg-gray-950 h-full overflow-hidden", className)}>
+      <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex items-center min-w-0 flex-1 mr-4">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="md:hidden mr-2 p-1.5 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md flex-shrink-0"
+            >
+              <ArrowLeft size={18} />
+            </button>
+          )}
+          <h2 className="text-lg font-medium text-gray-800 dark:text-gray-200 truncate">{file.name}</h2>
+        </div>
+        <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1 flex-shrink-0">
           <button
             onClick={() => setMode('edit')}
             className={`flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
