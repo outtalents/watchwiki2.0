@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FileNode } from '../types';
-import { ChevronRight, ChevronDown, FileText, Folder, Plus, FolderPlus, Trash2, Edit2, Check, X } from 'lucide-react';
+import { ChevronRight, ChevronDown, FileText, Folder, Plus, FolderPlus, Trash2, Edit2, Check, X, UploadCloud } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface SidebarProps {
@@ -11,6 +11,8 @@ interface SidebarProps {
   onAddNode: (parentId: string | null, type: 'file' | 'folder') => void;
   onDeleteNode: (id: string) => void;
   onRenameNode: (id: string, newName: string) => void;
+  onPublish?: () => void;
+  isPublishing?: boolean;
   className?: string;
 }
 
@@ -22,6 +24,8 @@ export function Sidebar({
   onAddNode,
   onDeleteNode,
   onRenameNode,
+  onPublish,
+  isPublishing,
   className,
 }: SidebarProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -171,6 +175,36 @@ export function Sidebar({
           </div>
         )}
       </div>
+      
+      {onPublish && (
+        <div className="p-4 border-t border-white/10 bg-[#15517a]">
+          <button
+            onClick={onPublish}
+            disabled={isPublishing}
+            className={cn(
+              "w-full flex items-center justify-center py-2 px-4 rounded-md text-sm font-medium transition-colors",
+              isPublishing 
+                ? "bg-white/20 text-white/70 cursor-not-allowed" 
+                : "bg-white text-[#15517a] hover:bg-gray-100 shadow-sm"
+            )}
+          >
+            {isPublishing ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/70 border-t-transparent rounded-full animate-spin mr-2"></div>
+                发布中...
+              </>
+            ) : (
+              <>
+                <UploadCloud size={16} className="mr-2" />
+                发布并保存
+              </>
+            )}
+          </button>
+          <p className="text-xs text-white/50 mt-2 text-center">
+            将当前内容保存为默认版本
+          </p>
+        </div>
+      )}
     </div>
   );
 }
