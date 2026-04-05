@@ -9,15 +9,23 @@ const STORAGE_KEY = 'watch_kb_data';
 
 export default function App() {
   const [nodes, setNodes] = useState<FileNode[]>(() => {
+    let initialNodes = defaultNodes as FileNode[];
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        initialNodes = JSON.parse(saved);
       } catch (e) {
         console.error('Failed to parse saved data', e);
       }
     }
-    return defaultNodes as FileNode[];
+    
+    // 默认只展开根目录，其他所有层级的文件夹默认收起
+    return initialNodes.map(node => {
+      if (node.type === 'folder') {
+        return { ...node, isOpen: node.id === 'root' };
+      }
+      return node;
+    });
   });
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
@@ -129,6 +137,30 @@ export default function App() {
     ));
   };
 
+  const handleReorderNode = (sourceId: string, targetId: string) => {
+    setNodes(prev => {
+      const sourceIndex = prev.findIndex(n => n.id === sourceId);
+      const targetIndex = prev.findIndex(n => n.id === targetId);
+      if (sourceIndex === -1 || targetIndex === -1 || sourceIndex === targetIndex) return prev;
+
+      const sourceNode = prev[sourceIndex];
+      const targetNode = prev[targetIndex];
+
+      // Only allow reordering within the same parent
+      if (sourceNode.parentId !== targetNode.parentId) return prev;
+
+      const newNodes = [...prev];
+      newNodes.splice(sourceIndex, 1);
+      
+      const newTargetIndex = newNodes.findIndex(n => n.id === targetId);
+      const insertIndex = sourceIndex < targetIndex ? newTargetIndex + 1 : newTargetIndex;
+      
+      newNodes.splice(insertIndex, 0, sourceNode);
+      
+      return newNodes;
+    });
+  };
+
   const handleUpdateContent = (id: string, content: string) => {
     setNodes(nodes.map(node => 
       node.id === id ? { ...node, content } : node
@@ -147,6 +179,7 @@ export default function App() {
         onAddNode={handleAddNode}
         onDeleteNode={handleDeleteNode}
         onRenameNode={handleRenameNode}
+        onReorderNode={handleReorderNode}
         onPublish={handlePublish}
         isPublishing={isPublishing}
         showControls={isDev}

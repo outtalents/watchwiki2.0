@@ -11,6 +11,7 @@ interface SidebarProps {
   onAddNode: (parentId: string | null, type: 'file' | 'folder') => void;
   onDeleteNode: (id: string) => void;
   onRenameNode: (id: string, newName: string) => void;
+  onReorderNode?: (sourceId: string, targetId: string) => void;
   onPublish?: () => void;
   isPublishing?: boolean;
   showControls?: boolean;
@@ -25,6 +26,7 @@ export function Sidebar({
   onAddNode,
   onDeleteNode,
   onRenameNode,
+  onReorderNode,
   onPublish,
   isPublishing,
   showControls = true,
@@ -32,6 +34,8 @@ export function Sidebar({
 }: SidebarProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [draggedNode, setDraggedNode] = useState<FileNode | null>(null);
+  const [dragOverNodeId, setDragOverNodeId] = useState<string | null>(null);
 
   const handleRenameStart = (e: React.MouseEvent, node: FileNode) => {
     e.stopPropagation();
@@ -56,13 +60,51 @@ export function Sidebar({
     const isOpen = node.isOpen;
     const isActive = activeFileId === node.id;
     const isEditing = editingId === node.id;
+    const isDragging = draggedNode?.id === node.id;
+    const isDragOver = dragOverNodeId === node.id;
 
     return (
-      <div key={node.id} className="select-none">
+      <div key={node.id} className="select-none mb-0.5">
         <div
+          draggable={showControls && !isEditing}
+          onDragStart={(e) => {
+            if (!showControls || isEditing) return;
+            setDraggedNode(node);
+            e.dataTransfer.setData('text/plain', node.id);
+            e.dataTransfer.effectAllowed = 'move';
+          }}
+          onDragOver={(e) => {
+            if (!showControls || !draggedNode) return;
+            // Only allow dropping on nodes with the same parent
+            if (draggedNode.parentId === node.parentId && draggedNode.id !== node.id) {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'move';
+              setDragOverNodeId(node.id);
+            }
+          }}
+          onDragLeave={() => {
+            if (dragOverNodeId === node.id) {
+              setDragOverNodeId(null);
+            }
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOverNodeId(null);
+            const sourceId = e.dataTransfer.getData('text/plain');
+            if (sourceId && sourceId !== node.id && draggedNode?.parentId === node.parentId) {
+              onReorderNode?.(sourceId, node.id);
+            }
+            setDraggedNode(null);
+          }}
+          onDragEnd={() => {
+            setDraggedNode(null);
+            setDragOverNodeId(null);
+          }}
           className={cn(
-            "group flex items-center py-1 px-2 hover:bg-white/10 cursor-pointer text-sm rounded-md mx-1 my-0.5",
-            isActive ? "bg-white/20 text-white" : "text-white/80",
+            "group flex items-center py-1 px-2 cursor-pointer text-sm rounded-md mx-1 transition-colors",
+            isActive ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10 hover:text-white",
+            isDragging && "opacity-50",
+            isDragOver && "bg-white/30 ring-1 ring-white/50",
             level > 0 && "ml-4"
           )}
           style={{ paddingLeft: `${level * 12 + 8}px` }}
