@@ -13,6 +13,7 @@ interface SidebarProps {
   onRenameNode: (id: string, newName: string) => void;
   onPublish?: () => void;
   isPublishing?: boolean;
+  showControls?: boolean;
   className?: string;
 }
 
@@ -26,6 +27,7 @@ export function Sidebar({
   onRenameNode,
   onPublish,
   isPublishing,
+  showControls = true,
   className,
 }: SidebarProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -97,7 +99,7 @@ export function Sidebar({
             )}
           </div>
 
-          {!isEditing && (
+          {!isEditing && showControls && (
             <div className="hidden group-hover:flex items-center space-x-1 ml-2">
               {isFolder && (
                 <>
@@ -150,22 +152,24 @@ export function Sidebar({
     <div className={cn("w-full md:w-64 flex-shrink-0 bg-[#15517a] text-white border-none flex-col h-full", className)}>
       <div className="p-4 border-b border-white/10 flex items-center justify-between bg-[#15517a]">
         <h1 className="font-semibold text-white truncate">Watch Wiki</h1>
-        <div className="flex space-x-1">
-          <button
-            onClick={() => onAddNode(null, 'file')}
-            className="p-1.5 text-white/70 hover:bg-white/10 hover:text-white rounded-md"
-            title="New Root File"
-          >
-            <Plus size={16} />
-          </button>
-          <button
-            onClick={() => onAddNode(null, 'folder')}
-            className="p-1.5 text-white/70 hover:bg-white/10 hover:text-white rounded-md"
-            title="New Root Folder"
-          >
-            <FolderPlus size={16} />
-          </button>
-        </div>
+        {showControls && (
+          <div className="flex space-x-1">
+            <button
+              onClick={() => onAddNode(null, 'file')}
+              className="p-1.5 text-white/70 hover:bg-white/10 hover:text-white rounded-md"
+              title="New Root File"
+            >
+              <Plus size={16} />
+            </button>
+            <button
+              onClick={() => onAddNode(null, 'folder')}
+              className="p-1.5 text-white/70 hover:bg-white/10 hover:text-white rounded-md"
+              title="New Root Folder"
+            >
+              <FolderPlus size={16} />
+            </button>
+          </div>
+        )}
       </div>
       <div className="flex-1 overflow-y-auto py-2 bg-[#15517a] text-white border-none">
         {rootNodes.map(node => renderNode(node, 0))}
@@ -176,7 +180,7 @@ export function Sidebar({
         )}
       </div>
       
-      {onPublish && (
+      {showControls && onPublish && (
         <div className="p-4 border-t border-white/10 bg-[#15517a]">
           <button
             onClick={onPublish}
@@ -191,17 +195,17 @@ export function Sidebar({
             {isPublishing ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/70 border-t-transparent rounded-full animate-spin mr-2"></div>
-                发布中...
+                生成中...
               </>
             ) : (
               <>
                 <UploadCloud size={16} className="mr-2" />
-                发布并保存
+                复制数据以发布
               </>
             )}
           </button>
           <p className="text-xs text-white/50 mt-2 text-center">
-            将当前内容保存为默认版本
+            将内容复制到 nodes.json
           </p>
         </div>
       )}

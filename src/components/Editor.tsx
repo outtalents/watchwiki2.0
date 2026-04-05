@@ -9,10 +9,11 @@ interface EditorProps {
   file: FileNode | null;
   onUpdateContent: (id: string, content: string) => void;
   onBack?: () => void;
+  showControls?: boolean;
   className?: string;
 }
 
-export function Editor({ file, onUpdateContent, onBack, className }: EditorProps) {
+export function Editor({ file, onUpdateContent, onBack, showControls = true, className }: EditorProps) {
   const [mode, setMode] = useState<'edit' | 'preview'>('preview');
   const [localContent, setLocalContent] = useState('');
 
@@ -20,9 +21,9 @@ export function Editor({ file, onUpdateContent, onBack, className }: EditorProps
     if (file) {
       setLocalContent(file.content || '');
       // Default to preview mode when opening a file, unless it's empty
-      setMode(file.content ? 'preview' : 'edit');
+      setMode(showControls && !file.content ? 'edit' : 'preview');
     }
-  }, [file?.id]);
+  }, [file?.id, showControls]);
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setLocalContent(e.target.value);
@@ -130,34 +131,36 @@ export function Editor({ file, onUpdateContent, onBack, className }: EditorProps
           )}
           <h2 className="text-lg font-medium text-gray-800 dark:text-gray-200 truncate">{file.name}</h2>
         </div>
-        <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1 flex-shrink-0">
-          <button
-            onClick={() => setMode('edit')}
-            className={`flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-              mode === 'edit'
-                ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-            }`}
-          >
-            <Edit3 size={16} className="mr-1.5" />
-            Edit
-          </button>
-          <button
-            onClick={() => setMode('preview')}
-            className={`flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-              mode === 'preview'
-                ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-            }`}
-          >
-            <Eye size={16} className="mr-1.5" />
-            Preview
-          </button>
-        </div>
+        {showControls && (
+          <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1 flex-shrink-0">
+            <button
+              onClick={() => setMode('edit')}
+              className={`flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                mode === 'edit'
+                  ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+            >
+              <Edit3 size={16} className="mr-1.5" />
+              Edit
+            </button>
+            <button
+              onClick={() => setMode('preview')}
+              className={`flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                mode === 'preview'
+                  ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+            >
+              <Eye size={16} className="mr-1.5" />
+              Preview
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-auto relative">
-        {mode === 'edit' ? (
+        {mode === 'edit' && showControls ? (
           <textarea
             value={localContent}
             onChange={handleContentChange}

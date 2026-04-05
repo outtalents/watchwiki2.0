@@ -3,53 +3,71 @@ import { Sidebar } from './components/Sidebar';
 import { Editor } from './components/Editor';
 import { FileNode } from './types';
 import { v4 as uuidv4 } from 'uuid';
+import defaultNodes from './data/nodes.json';
+
+const STORAGE_KEY = 'watch_kb_data';
 
 export default function App() {
-  const [nodes, setNodes] = useState<FileNode[]>([]);
+  const [nodes, setNodes] = useState<FileNode[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse saved data', e);
+      }
+    }
+    return defaultNodes as FileNode[];
+  });
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  
+  const isDev = import.meta.env.DEV;
 
-  // Fetch initial nodes from API
   useEffect(() => {
-    const fetchNodes = async () => {
-      try {
-        const response = await fetch('/api/nodes');
-        if (response.ok) {
-          const data = await response.json();
-          setNodes(data);
-        } else {
-          console.error('Failed to fetch nodes from API');
-        }
-      } catch (error) {
-        console.error('API error:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchNodes();
-  }, []);
+    if (nodes.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nodes));
+    }
+  }, [nodes]);
 
   const handlePublish = async () => {
     setIsPublishing(true);
-    try {
-      const response = await fetch('/api/save', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ nodes }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to save');
+    const jsonStr = JSON.stringify(nodes, null, 2);
+    
+    const fallbackCopyTextToClipboard = (text: string) => {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.position = "fixed";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          alert('✅ 数据已成功复制到剪贴板！\n\n请在左侧代码编辑器中打开 src/data/nodes.json 文件，将内容粘贴进去并保存。\n\n这样您的修改就会永久生效，部署到 Cloudflare 后也会显示最新内容。');
+        } else {
+          throw new Error('Fallback copy failed');
+        }
+      } catch (err) {
+        console.error('Fallback: Oops, unable to copy', err);
+        alert('复制失败，请在控制台(Console)中查看并手动复制数据。');
+        console.log(text);
       }
-      
-      alert('发布成功！内容已保存到源码中。');
+      document.body.removeChild(textArea);
+    };
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(jsonStr);
+        alert('✅ 数据已成功复制到剪贴板！\n\n请在左侧代码编辑器中打开 src/data/nodes.json 文件，将内容粘贴进去并保存。\n\n这样您的修改就会永久生效，部署到 Cloudflare 后也会显示最新内容。');
+      } else {
+        fallbackCopyTextToClipboard(jsonStr);
+      }
     } catch (error) {
       console.error('Publish error:', error);
-      alert('发布失败，请重试。');
+      fallbackCopyTextToClipboard(jsonStr);
     } finally {
       setIsPublishing(false);
     }
@@ -119,17 +137,6 @@ export default function App() {
 
   const activeFile = nodes.find(n => n.id === activeFileId) || null;
 
-  if (isLoading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-[#15517a] border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p>加载中...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex h-screen w-full bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans overflow-hidden">
       <Sidebar
@@ -142,12 +149,14 @@ export default function App() {
         onRenameNode={handleRenameNode}
         onPublish={handlePublish}
         isPublishing={isPublishing}
+        showControls={isDev}
         className={activeFileId ? "hidden md:flex" : "flex"}
       />
       <Editor
         file={activeFile}
         onUpdateContent={handleUpdateContent}
         onBack={() => setActiveFileId(null)}
+        showControls={isDev}
         className={!activeFileId ? "hidden md:flex" : "flex"}
       />
     </div>
