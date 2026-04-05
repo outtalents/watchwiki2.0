@@ -111,7 +111,7 @@ export function Editor({ file, onUpdateContent, onBack, showControls = true, cla
           <h2 className="text-xl font-medium text-[#15517a]">Watch Industry Knowledge Base</h2>
         </div>
         <div className="absolute bottom-8 w-full text-center">
-          <p className="text-sm text-[#15517a] opacity-60">Created by 果断</p>
+          <p className="text-sm text-[#15517a] opacity-60">Created by 果断 © 2026</p>
         </div>
       </div>
     );
