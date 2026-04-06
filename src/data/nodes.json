@@ -36,10 +36,10 @@
   },
   {
     "id": "c266f2a6-80a7-4b44-a276-01b1e73d3a6a",
-    "name": "财务与风险管控",
+    "name": "商家财务与风险管控",
     "type": "folder",
     "parentId": "root",
-    "isOpen": false
+    "isOpen": true
   },
   {
     "id": "bd899440-058c-41f8-b5b6-c3a9ca76ff0b",
@@ -64,7 +64,7 @@
   },
   {
     "id": "7f0eafbf-0c0d-4ef6-bafb-9e0a0c4c250f",
-    "name": "产品专业知识",
+    "name": "附录：常见产品专业知识",
     "type": "folder",
     "parentId": "root",
     "isOpen": false
