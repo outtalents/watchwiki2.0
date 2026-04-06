@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FileNode } from '../types';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Edit3, Eye, ArrowLeft, Save } from 'lucide-react';
+import { 
+  Edit3, Eye, ArrowLeft, Save, 
+  Bold, Italic, Heading1, Heading2, Heading3, 
+  List, ListOrdered, Quote, Code, Link as LinkIcon
+} from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface EditorProps {
@@ -18,6 +22,7 @@ interface EditorProps {
 export function Editor({ file, onUpdateContent, onBack, onPublish, isPublishing, showControls = true, className }: EditorProps) {
   const [mode, setMode] = useState<'edit' | 'preview'>('preview');
   const [localContent, setLocalContent] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (file) {
@@ -32,6 +37,31 @@ export function Editor({ file, onUpdateContent, onBack, onPublish, isPublishing,
     if (file) {
       onUpdateContent(file.id, e.target.value);
     }
+  };
+
+  const insertText = (before: string, after: string = '') => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const selectedText = text.substring(start, end);
+    const newText = text.substring(0, start) + before + selectedText + after + text.substring(end);
+
+    setLocalContent(newText);
+    if (file) {
+      onUpdateContent(file.id, newText);
+    }
+
+    // Focus back and set selection
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(
+        start + before.length,
+        end + before.length
+      );
+    }, 0);
   };
 
   if (!file) {
@@ -178,14 +208,32 @@ export function Editor({ file, onUpdateContent, onBack, onPublish, isPublishing,
         )}
       </div>
 
-      <div className="flex-1 overflow-auto relative">
+      <div className="flex-1 flex flex-col overflow-hidden relative">
         {mode === 'edit' && showControls ? (
-          <textarea
-            value={localContent}
-            onChange={handleContentChange}
-            className="w-full h-full p-6 resize-none outline-none bg-transparent text-gray-800 dark:text-gray-200 font-mono text-sm leading-relaxed"
-            placeholder="Start typing your markdown here..."
-          />
+          <>
+            <div className="flex items-center space-x-1 px-4 py-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 overflow-x-auto no-scrollbar">
+              <button onClick={() => insertText('**', '**')} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-800 rounded text-gray-600 dark:text-gray-400" title="加粗"><Bold size={16} /></button>
+              <button onClick={() => insertText('*', '*')} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-800 rounded text-gray-600 dark:text-gray-400" title="斜体"><Italic size={16} /></button>
+              <div className="w-px h-4 bg-gray-300 dark:bg-gray-700 mx-1" />
+              <button onClick={() => insertText('# ')} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-800 rounded text-gray-600 dark:text-gray-400" title="一级标题"><Heading1 size={16} /></button>
+              <button onClick={() => insertText('## ')} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-800 rounded text-gray-600 dark:text-gray-400" title="二级标题"><Heading2 size={16} /></button>
+              <button onClick={() => insertText('### ')} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-800 rounded text-gray-600 dark:text-gray-400" title="三级标题"><Heading3 size={16} /></button>
+              <div className="w-px h-4 bg-gray-300 dark:bg-gray-700 mx-1" />
+              <button onClick={() => insertText('- ')} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-800 rounded text-gray-600 dark:text-gray-400" title="无序列表"><List size={16} /></button>
+              <button onClick={() => insertText('1. ')} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-800 rounded text-gray-600 dark:text-gray-400" title="有序列表"><ListOrdered size={16} /></button>
+              <div className="w-px h-4 bg-gray-300 dark:bg-gray-700 mx-1" />
+              <button onClick={() => insertText('> ')} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-800 rounded text-gray-600 dark:text-gray-400" title="引用"><Quote size={16} /></button>
+              <button onClick={() => insertText('`', '`')} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-800 rounded text-gray-600 dark:text-gray-400" title="代码"><Code size={16} /></button>
+              <button onClick={() => insertText('[', '](url)')} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-800 rounded text-gray-600 dark:text-gray-400" title="链接"><LinkIcon size={16} /></button>
+            </div>
+            <textarea
+              ref={textareaRef}
+              value={localContent}
+              onChange={handleContentChange}
+              className="w-full h-full p-6 resize-none outline-none bg-transparent text-gray-800 dark:text-gray-200 font-mono text-sm leading-relaxed"
+              placeholder="Start typing your markdown here..."
+            />
+          </>
         ) : (
           <div className="p-8 max-w-4xl mx-auto">
             <div className="prose prose-blue dark:prose-invert max-w-none">
