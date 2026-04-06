@@ -54,7 +54,7 @@ export default function App() {
       try {
         const successful = document.execCommand('copy');
         if (successful) {
-          alert('✅ 数据已成功复制到剪贴板！\n\n请在左侧代码编辑器中打开 src/data/nodes.json 文件，将内容粘贴进去并保存。\n\n这样您的修改就会永久生效，部署到 Cloudflare 后也会显示最新内容。');
+          alert('✅ 数据已成功复制到剪贴板！\n\n数据包含：所有的目录结构和文件内容。\n\n请在左侧代码编辑器中打开 src/data/nodes.json 文件，将内容粘贴进去并保存。\n\n这样您的修改就会永久生效，部署到 Cloudflare 后也会显示最新内容。');
         } else {
           throw new Error('Fallback copy failed');
         }
@@ -69,7 +69,7 @@ export default function App() {
     try {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(jsonStr);
-        alert('✅ 数据已成功复制到剪贴板！\n\n请在左侧代码编辑器中打开 src/data/nodes.json 文件，将内容粘贴进去并保存。\n\n这样您的修改就会永久生效，部署到 Cloudflare 后也会显示最新内容。');
+        alert('✅ 数据已成功复制到剪贴板！\n\n数据包含：所有的目录结构和文件内容。\n\n请在左侧代码编辑器中打开 src/data/nodes.json 文件，将内容粘贴进去并保存。\n\n这样您的修改就会永久生效，部署到 Cloudflare 后也会显示最新内容。');
       } else {
         fallbackCopyTextToClipboard(jsonStr);
       }
@@ -86,7 +86,7 @@ export default function App() {
   };
 
   const handleToggleFolder = (id: string) => {
-    setNodes(nodes.map(node => 
+    setNodes(prev => prev.map(node => 
       node.id === id ? { ...node, isOpen: !node.isOpen } : node
     ));
   };
@@ -101,7 +101,7 @@ export default function App() {
       isOpen: type === 'folder' ? true : undefined,
     };
 
-    setNodes([...nodes, newNode]);
+    setNodes(prev => [...prev, newNode]);
     
     if (parentId) {
       setNodes(prev => prev.map(n => n.id === parentId ? { ...n, isOpen: true } : n));
@@ -113,26 +113,28 @@ export default function App() {
   };
 
   const handleDeleteNode = (id: string) => {
-    // Recursively find all children to delete
-    const getChildrenIds = (nodeId: string): string[] => {
-      const children = nodes.filter(n => n.parentId === nodeId);
-      return [
-        ...children.map(c => c.id),
-        ...children.flatMap(c => getChildrenIds(c.id))
-      ];
-    };
+    setNodes(prev => {
+      // Recursively find all children to delete
+      const getChildrenIds = (nodeId: string): string[] => {
+        const children = prev.filter(n => n.parentId === nodeId);
+        return [
+          ...children.map(c => c.id),
+          ...children.flatMap(c => getChildrenIds(c.id))
+        ];
+      };
 
-    const idsToDelete = new Set([id, ...getChildrenIds(id)]);
-    
-    setNodes(nodes.filter(n => !idsToDelete.has(n.id)));
-    
-    if (activeFileId && idsToDelete.has(activeFileId)) {
-      setActiveFileId(null);
-    }
+      const idsToDelete = new Set([id, ...getChildrenIds(id)]);
+      
+      if (activeFileId && idsToDelete.has(activeFileId)) {
+        setActiveFileId(null);
+      }
+
+      return prev.filter(n => !idsToDelete.has(n.id));
+    });
   };
 
   const handleRenameNode = (id: string, newName: string) => {
-    setNodes(nodes.map(node => 
+    setNodes(prev => prev.map(node => 
       node.id === id ? { ...node, name: newName } : node
     ));
   };
@@ -162,7 +164,7 @@ export default function App() {
   };
 
   const handleUpdateContent = (id: string, content: string) => {
-    setNodes(nodes.map(node => 
+    setNodes(prev => prev.map(node => 
       node.id === id ? { ...node, content } : node
     ));
   };
@@ -189,6 +191,8 @@ export default function App() {
         file={activeFile}
         onUpdateContent={handleUpdateContent}
         onBack={() => setActiveFileId(null)}
+        onPublish={handlePublish}
+        isPublishing={isPublishing}
         showControls={isDev}
         className={!activeFileId ? "hidden md:flex" : "flex"}
       />

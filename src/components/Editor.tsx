@@ -2,18 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { FileNode } from '../types';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Edit3, Eye, ArrowLeft } from 'lucide-react';
+import { Edit3, Eye, ArrowLeft, Save } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface EditorProps {
   file: FileNode | null;
   onUpdateContent: (id: string, content: string) => void;
   onBack?: () => void;
+  onPublish?: () => void;
+  isPublishing?: boolean;
   showControls?: boolean;
   className?: string;
 }
 
-export function Editor({ file, onUpdateContent, onBack, showControls = true, className }: EditorProps) {
+export function Editor({ file, onUpdateContent, onBack, onPublish, isPublishing, showControls = true, className }: EditorProps) {
   const [mode, setMode] = useState<'edit' | 'preview'>('preview');
   const [localContent, setLocalContent] = useState('');
 
@@ -132,29 +134,46 @@ export function Editor({ file, onUpdateContent, onBack, showControls = true, cla
           <h2 className="text-lg font-medium text-gray-800 dark:text-gray-200 truncate">{file.name}</h2>
         </div>
         {showControls && (
-          <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1 flex-shrink-0">
-            <button
-              onClick={() => setMode('edit')}
-              className={`flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                mode === 'edit'
-                  ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-              }`}
-            >
-              <Edit3 size={16} className="mr-1.5" />
-              Edit
-            </button>
-            <button
-              onClick={() => setMode('preview')}
-              className={`flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                mode === 'preview'
-                  ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-              }`}
-            >
-              <Eye size={16} className="mr-1.5" />
-              Preview
-            </button>
+          <div className="flex items-center space-x-2">
+            {onPublish && (
+              <button
+                onClick={onPublish}
+                disabled={isPublishing}
+                className="flex items-center px-3 py-1.5 text-sm font-medium rounded-md bg-[#15517a] text-white hover:bg-[#1a6294] transition-colors disabled:opacity-50"
+                title="Save all changes and copy to clipboard"
+              >
+                {isPublishing ? (
+                  <div className="w-4 h-4 border-2 border-white/70 border-t-transparent rounded-full animate-spin mr-1.5"></div>
+                ) : (
+                  <Save size={16} className="mr-1.5" />
+                )}
+                保存并复制数据
+              </button>
+            )}
+            <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1 flex-shrink-0">
+              <button
+                onClick={() => setMode('edit')}
+                className={`flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  mode === 'edit'
+                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
+              >
+                <Edit3 size={16} className="mr-1.5" />
+                编辑
+              </button>
+              <button
+                onClick={() => setMode('preview')}
+                className={`flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  mode === 'preview'
+                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
+              >
+                <Eye size={16} className="mr-1.5" />
+                预览
+              </button>
+            </div>
           </div>
         )}
       </div>
