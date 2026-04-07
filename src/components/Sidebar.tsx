@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FileNode } from '../types';
-import { ChevronRight, ChevronDown, FileText, Folder, Plus, FolderPlus, Trash2, Edit2, Check, X, UploadCloud } from 'lucide-react';
+import { ChevronRight, ChevronDown, FileText, Folder, Plus, FolderPlus, Trash2, Edit2, Check, X, UploadCloud, Search } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface SidebarProps {
@@ -13,6 +13,8 @@ interface SidebarProps {
   onRenameNode: (id: string, newName: string) => void;
   onReorderNode?: (sourceId: string, targetId: string) => void;
   onPublish?: () => void;
+  onGoHome?: () => void;
+  onSearchClick?: () => void;
   isPublishing?: boolean;
   showControls?: boolean;
   className?: string;
@@ -28,6 +30,8 @@ export function Sidebar({
   onRenameNode,
   onReorderNode,
   onPublish,
+  onGoHome,
+  onSearchClick,
   isPublishing,
   showControls = true,
   className,
@@ -193,25 +197,39 @@ export function Sidebar({
   return (
     <div className={cn("w-full md:w-64 flex-shrink-0 bg-[#15517a] text-white border-none flex-col h-full", className)}>
       <div className="p-4 border-b border-white/10 flex items-center justify-between bg-[#15517a]">
-        <h1 className="font-semibold text-white truncate">Watch Wiki</h1>
-        {showControls && (
-          <div className="flex space-x-1">
-            <button
-              onClick={() => onAddNode(null, 'file')}
-              className="p-1.5 text-white/70 hover:bg-white/10 hover:text-white rounded-md"
-              title="New Root File"
-            >
-              <Plus size={16} />
-            </button>
-            <button
-              onClick={() => onAddNode(null, 'folder')}
-              className="p-1.5 text-white/70 hover:bg-white/10 hover:text-white rounded-md"
-              title="New Root Folder"
-            >
-              <FolderPlus size={16} />
-            </button>
-          </div>
-        )}
+        <h1 
+          className="font-semibold text-white truncate cursor-pointer hover:text-white/80 transition-colors"
+          onClick={onGoHome}
+        >
+          Watch Wiki
+        </h1>
+        <div className="flex space-x-1">
+          <button
+            onClick={onSearchClick}
+            className="md:hidden p-1.5 text-white/70 hover:bg-white/10 hover:text-white rounded-md"
+            title="Search"
+          >
+            <Search size={16} />
+          </button>
+          {showControls && (
+            <>
+              <button
+                onClick={() => onAddNode(null, 'file')}
+                className="p-1.5 text-white/70 hover:bg-white/10 hover:text-white rounded-md"
+                title="New Root File"
+              >
+                <Plus size={16} />
+              </button>
+              <button
+                onClick={() => onAddNode(null, 'folder')}
+                className="p-1.5 text-white/70 hover:bg-white/10 hover:text-white rounded-md"
+                title="New Root Folder"
+              >
+                <FolderPlus size={16} />
+              </button>
+            </>
+          )}
+        </div>
       </div>
       <div className="flex-1 overflow-y-auto py-2 bg-[#15517a] text-white border-none">
         {rootNodes.map(node => renderNode(node, 0))}

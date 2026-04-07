@@ -8,10 +8,10 @@
   },
   {
     "id": "942aaeb9-b30b-43c7-87e5-2f2af3c21fff",
-    "name": "市场格局与行业趋势",
+    "name": "市场格局与行业趋势11",
     "type": "folder",
     "parentId": "root",
-    "isOpen": false
+    "isOpen": true
   },
   {
     "id": "3c37388f-7bf2-44d0-bbeb-0ab1b96ed36f",
@@ -25,7 +25,7 @@
     "name": "供应链管理与产品开发",
     "type": "folder",
     "parentId": "root",
-    "isOpen": true
+    "isOpen": false
   },
   {
     "id": "c266f2a6-80a7-4b44-a276-01b1e73d3a6a",

@@ -3,7 +3,7 @@ import { FileNode } from '../types';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { 
-  Edit3, Eye, ArrowLeft, Save, 
+  Edit3, Eye, ArrowLeft, Save, Search,
   Bold, Italic, Heading1, Heading2, Heading3, 
   List, ListOrdered, Quote, Code, Link as LinkIcon
 } from 'lucide-react';
@@ -14,12 +14,13 @@ interface EditorProps {
   onUpdateContent: (id: string, content: string) => void;
   onBack?: () => void;
   onPublish?: () => void;
+  onSearchClick?: () => void;
   isPublishing?: boolean;
   showControls?: boolean;
   className?: string;
 }
 
-export function Editor({ file, onUpdateContent, onBack, onPublish, isPublishing, showControls = true, className }: EditorProps) {
+export function Editor({ file, onUpdateContent, onBack, onPublish, onSearchClick, isPublishing, showControls = true, className }: EditorProps) {
   const [mode, setMode] = useState<'edit' | 'preview'>('preview');
   const [localContent, setLocalContent] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -67,6 +68,15 @@ export function Editor({ file, onUpdateContent, onBack, onPublish, isPublishing,
   if (!file) {
     return (
       <div className={cn("flex-1 flex items-center justify-center bg-white dark:bg-gray-950 text-gray-400 relative", className)}>
+        <div className="absolute top-4 right-4 md:top-6 md:right-6">
+          <button
+            onClick={onSearchClick}
+            className="flex items-center w-48 md:w-64 px-3 py-1.5 text-sm border border-[#15517a]/30 dark:border-blue-500/30 rounded-md text-gray-500 hover:border-[#15517a] dark:hover:border-blue-500 transition-colors bg-white dark:bg-gray-900"
+          >
+            <Search size={16} className="mr-2 text-[#15517a] dark:text-blue-400" />
+            搜索文章...
+          </button>
+        </div>
         <div className="text-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -165,6 +175,14 @@ export function Editor({ file, onUpdateContent, onBack, onPublish, isPublishing,
         </div>
         {showControls && (
           <div className="flex items-center space-x-2">
+            <button
+              onClick={onSearchClick}
+              className="flex items-center md:w-48 px-2 md:px-3 py-1.5 text-sm border border-[#15517a]/30 dark:border-blue-500/30 rounded-md text-gray-500 hover:border-[#15517a] dark:hover:border-blue-500 transition-colors bg-white dark:bg-gray-900 md:mr-2"
+              title="搜索"
+            >
+              <Search size={16} className="text-[#15517a] dark:text-blue-400 md:mr-2" />
+              <span className="hidden md:inline">搜索...</span>
+            </button>
             {onPublish && (
               <button
                 onClick={onPublish}
